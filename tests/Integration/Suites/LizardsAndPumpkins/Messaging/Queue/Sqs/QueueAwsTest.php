@@ -26,7 +26,7 @@ class QueueAwsTest extends TestCase
      */
     private $queueUrl;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->sqsClient = SqsClient::factory([
             'credentials' => [
@@ -45,26 +45,26 @@ class QueueAwsTest extends TestCase
         $this->queue = new SqsQueue($this->sqsClient, $this->queueUrl);
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         $this->sqsClient->deleteQueue([
             'QueueUrl' => $this->queueUrl,
         ]);
     }
 
-    public function testEmptyAtBeginning()
+    public function testEmptyAtBeginning(): void
     {
         $this->assertSame(0, $this->queue->count());
     }
 
-    public function testCountRaisesAfterAddingAMessage()
+    public function testCountRaisesAfterAddingAMessage(): void
     {
         $message = Message::withCurrentTime('my Message', [], []);
         $this->queue->add($message);
         $this->assertSame(1, $this->count());
     }
 
-    public function testAddedMessageComesBack()
+    public function testAddedMessageComesBack(): void
     {
         $message = Message::withCurrentTime('my Message', ['with complex payload'], ['and' => 'some metadata']);
         $this->queue->add($message);
@@ -76,7 +76,7 @@ class QueueAwsTest extends TestCase
              */
             public $message;
 
-            public function receive(Message $message)
+            public function receive(Message $message): void
             {
                 $this->message = $message;
             }
@@ -89,7 +89,7 @@ class QueueAwsTest extends TestCase
         $this->assertSame($message->serialize(), $returnedMessage->serialize());
     }
 
-    public function testCountMessages()
+    public function testCountMessages(): void
     {
         $count = 4;
         for ($i = 0; $i < $count; $i++) {
@@ -98,7 +98,7 @@ class QueueAwsTest extends TestCase
         $this->assertSame($count, $this->queue->count());
     }
 
-    public function testClear()
+    public function testClear(): void
     {
         $count = 4;
         for ($i = 0; $i < $count; $i++) {

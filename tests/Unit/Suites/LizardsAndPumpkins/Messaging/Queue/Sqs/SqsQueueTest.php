@@ -27,7 +27,7 @@ class SqsQueueTest extends TestCase
      */
     private $queueName = 'testQueueName';
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->sqsClientMock = $this->getMockBuilder(SqsClient::class)
             ->disableOriginalConstructor()
@@ -43,7 +43,7 @@ class SqsQueueTest extends TestCase
         $this->assertSame($count, $this->queue->count());
     }
 
-    public function testAddMessageToTestQueue()
+    public function testAddMessageToTestQueue(): void
     {
         $json = 'fancy_serialized_message';
 
@@ -60,7 +60,7 @@ class SqsQueueTest extends TestCase
         $this->queue->add($message);
     }
 
-    public function testCountIncreasesOnAddMessage()
+    public function testCountIncreasesOnAddMessage(): void
     {
         $message = $this->getMessage();
 
@@ -75,7 +75,7 @@ class SqsQueueTest extends TestCase
     /**
      * @return Message|MockObject
      */
-    private function getMessage()
+    private function getMessage(): Message
     {
         /** @var Message|MockObject $message */
         $message = $this->createMock(Message::class);
@@ -104,14 +104,14 @@ class SqsQueueTest extends TestCase
             ->willReturn($response);
     }
 
-    public function testCleanCallsPurge()
+    public function testCleanCallsPurge(): void
     {
         $this->sqsClientMock->expects($this->once())->method('PurgeQueue')->with(['QueueUrl' => $this->queueName]);
 
         $this->queue->clear();
     }
 
-    public function testConsume()
+    public function testConsume(): void
     {
         $messageReciever = $this->createMock(MessageReceiver::class);
         $messageReciever->expects($this->once())->method('receive')->with($this->isInstanceOf(Message::class));
