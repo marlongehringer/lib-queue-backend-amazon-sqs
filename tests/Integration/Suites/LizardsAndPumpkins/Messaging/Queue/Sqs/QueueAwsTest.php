@@ -88,4 +88,13 @@ class QueueAwsTest extends TestCase
         $returnedMessage = $receiver->message;
         $this->assertSame($message->serialize(), $returnedMessage->serialize());
     }
+
+    public function testCountMessages()
+    {
+        $count = 4;
+        for ($i = 0; $i < $count; $i++) {
+            $this->queue->add(Message::withCurrentTime('name', [], []));
+        }
+        $this->assertSame($count, $this->queue->count());
+    }
 }
