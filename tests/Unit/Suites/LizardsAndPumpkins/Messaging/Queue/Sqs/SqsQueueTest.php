@@ -5,6 +5,7 @@ namespace LizardsAndPumpkins\Messaging\Queue\Sqs;
 
 use Aws\Sqs\SqsClient;
 use Guzzle\Service\Resource\Model;
+use LizardsAndPumpkins\Messaging\MessageReceiver;
 use LizardsAndPumpkins\Messaging\Queue\Message;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -30,7 +31,7 @@ class SqsQueueTest extends TestCase
     {
         $this->sqsClientMock = $this->getMockBuilder(SqsClient::class)
             ->disableOriginalConstructor()
-            ->setMethods(['sendMessage', 'getQueueAttributes', 'PurgeQueue'])->getMock();
+            ->setMethods(['sendMessage', 'getQueueAttributes', 'PurgeQueue', 'receiveMessage'])->getMock();
         $this->queue = new SqsQueue($this->sqsClientMock, $this->queueName);
     }
 
@@ -108,5 +109,34 @@ class SqsQueueTest extends TestCase
         $this->sqsClientMock->expects($this->once())->method('PurgeQueue')->with(['QueueUrl' => $this->queueName]);
 
         $this->queue->clear();
+    }
+
+    public function testConsume()
+    {
+        $messageReciever = $this->createMock(MessageReceiver::class);
+        $messageReciever->expects($this->once())->method('receive')->with($this->isInstanceOf(Message::class));
+
+        $numberOfMessages = 1;
+        $arguments = [
+            'QueueUrl' => $this->queueName,
+            'WaitTimeSeconds' => 20,
+            'MaxNumberOfMessages' => $numberOfMessages,
+        ];
+
+        $messageBody = Message::withCurrentTime('messageName', ['thisIsThePayload'], ['metadata' => 'is possible!'])
+            ->serialize();
+
+        $messages = $this->createMock(Model::class);
+        $messages->method('get')->with('Messages')->willReturn(
+            $allMessages = [
+                $singleMessage = [
+                    'Body' => $messageBody,
+                ],
+            ]
+        );
+
+        $this->sqsClientMock->expects($this->once())->method('receiveMessage')->with($arguments)->willReturn($messages);
+
+        $this->queue->consume($messageReciever, $numberOfMessages);
     }
 }

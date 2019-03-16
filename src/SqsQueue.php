@@ -59,6 +59,16 @@ class SqsQueue implements Queue, Clearable
 
     public function consume(MessageReceiver $messageReceiver, int $numberOfMessagesToConsume)
     {
-        // TODO: Implement consume() method.
+        $messages = $this->client->receiveMessage([
+            'QueueUrl' => $this->queueUrl,
+            'WaitTimeSeconds' => 20,
+            'MaxNumberOfMessages' => $numberOfMessagesToConsume,
+        ])->get('Messages');
+
+        foreach ($messages as $message) {
+            $message = Message::rehydrate($message['Body']);
+            $messageReceiver->receive($message);
+            $numberOfMessagesToConsume--;
+        }
     }
 }
