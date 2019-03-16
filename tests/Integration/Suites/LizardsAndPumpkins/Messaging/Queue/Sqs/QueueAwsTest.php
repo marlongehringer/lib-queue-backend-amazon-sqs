@@ -5,6 +5,7 @@ namespace LizardsAndPumpkins\Messaging\Queue\Sqs;
 
 use Aws\Sqs\SqsClient;
 use Guzzle\Service\Resource\Model;
+use LizardsAndPumpkins\Messaging\Queue\Message;
 use PHPUnit\Framework\TestCase;
 
 class QueueAwsTest extends TestCase
@@ -26,7 +27,7 @@ class QueueAwsTest extends TestCase
 
     protected function setUp()
     {
-        $sqsClient = SqsClient::factory([
+        $this->sqsClient = SqsClient::factory([
             'credentials' => [
                 'key' => $_ENV['aws_key'],
                 'secret' => $_ENV['aws_secret'],
@@ -34,14 +35,13 @@ class QueueAwsTest extends TestCase
             'region' => 'eu-central-1',
         ]);
         $queueName = str_replace('.', '-', uniqid('lap-sqs-test', true));
-        $this->sqsClient = $sqsClient;
 
         /** @var Model $response */
         $response = $this->sqsClient->createQueue([
             'QueueName' => $queueName,
         ]);
         $this->queueUrl = $response->get('QueueUrl');
-        $this->queue = new SqsQueue($this->sqsClient, $queueName);
+        $this->queue = new SqsQueue($this->sqsClient, $this->queueUrl);
     }
 
     protected function tearDown()
@@ -51,9 +51,15 @@ class QueueAwsTest extends TestCase
         ]);
     }
 
-
-    public function testFalse()
+    public function testEmptyAtBeginning()
     {
+        $this->assertSame(0, $this->queue->count());
+    }
 
+    public function testCountRaisesAfterAddingAMessage()
+    {
+        $message = Message::withCurrentTime('my Message', [], []);
+        $this->queue->add($message);
+        $this->assertSame(1, $this->count());
     }
 }

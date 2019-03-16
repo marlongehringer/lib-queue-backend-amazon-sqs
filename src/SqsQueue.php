@@ -41,7 +41,7 @@ class SqsQueue implements Queue, Clearable
                 'AttributeNames' => ['ApproximateNumberOfMessages'],
             ]
         );
-        return $queueAttributes->get('Attributes')['ApproximateNumberOfMessages'];
+        return (int)$queueAttributes->get('Attributes')['ApproximateNumberOfMessages'];
     }
 
     /**
