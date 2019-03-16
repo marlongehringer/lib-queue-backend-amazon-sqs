@@ -97,4 +97,15 @@ class QueueAwsTest extends TestCase
         }
         $this->assertSame($count, $this->queue->count());
     }
+
+    public function testClear()
+    {
+        $count = 4;
+        for ($i = 0; $i < $count; $i++) {
+            $this->queue->add(Message::withCurrentTime('name', [], []));
+        }
+        $this->assertSame($count, $this->queue->count());
+        $this->queue->clear();
+        $this->assertSame(0, $this->queue->count());
+    }
 }
