@@ -10,6 +10,9 @@ use LizardsAndPumpkins\Messaging\Queue\Message;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @covers \LizardsAndPumpkins\Messaging\Queue\Sqs\SqsQueue
+ */
 class SqsQueueTest extends TestCase
 {
     /**

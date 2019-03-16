@@ -12,6 +12,9 @@ use LizardsAndPumpkins\Util\Factory\MasterFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @covers \LizardsAndPumpkins\Messaging\Queue\Sqs\SqsFactory
+ */
 class SqsFactoryTest extends TestCase
 {
     /**
