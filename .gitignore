@@ -1,0 +1,4 @@
+/vendor/
+/composer.lock
+/tests/Integration/phpunit.xml
+/tests/Unit/phpunit.xml
