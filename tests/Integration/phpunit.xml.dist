@@ -31,7 +31,7 @@
         </whitelist>
     </filter>
     <php>
-        <env name="key" value="AWS_ACCESS_KEY_ID"/>
-        <env name="secret" value="AWS_SECRET_ACCESS_KEY"/>
+        <env name="aws_key" value="AWS_ACCESS_KEY_ID"/>
+        <env name="aws_secret" value="AWS_SECRET_ACCESS_KEY"/>
     </php>
 </phpunit>
