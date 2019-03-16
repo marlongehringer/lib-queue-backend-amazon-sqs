@@ -28,12 +28,9 @@ class SqsQueue implements Queue, Clearable
         $this->queueUrl = $queueUrl;
     }
 
-    /**
-     * @return void
-     */
-    public function clear()
+    public function clear(): void
     {
-        // TODO: Implement clear() method.
+        $this->client->purgeQueue(['QueueUrl' => $this->queueUrl]);
     }
 
     public function count(): int
@@ -52,7 +49,7 @@ class SqsQueue implements Queue, Clearable
      *
      * @return void
      */
-    public function add(Message $message)
+    public function add(Message $message): void
     {
         $this->client->sendMessage([
             'QueueUrl' => $this->queueUrl,

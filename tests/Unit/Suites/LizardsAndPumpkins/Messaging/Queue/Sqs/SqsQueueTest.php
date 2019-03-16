@@ -30,7 +30,7 @@ class SqsQueueTest extends TestCase
     {
         $this->sqsClientMock = $this->getMockBuilder(SqsClient::class)
             ->disableOriginalConstructor()
-            ->setMethods(['sendMessage', 'getQueueAttributes'])->getMock();
+            ->setMethods(['sendMessage', 'getQueueAttributes', 'PurgeQueue'])->getMock();
         $this->queue = new SqsQueue($this->sqsClientMock, $this->queueName);
     }
 
@@ -101,5 +101,12 @@ class SqsQueueTest extends TestCase
             ->method('getQueueAttributes')
             ->with($arguments)
             ->willReturn($response);
+    }
+
+    public function testCleanCallsPurge()
+    {
+        $this->sqsClientMock->expects($this->once())->method('PurgeQueue')->with(['QueueUrl' => $this->queueName]);
+
+        $this->queue->clear();
     }
 }
