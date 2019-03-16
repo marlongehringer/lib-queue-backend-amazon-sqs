@@ -10,7 +10,7 @@
   ],
   "require": {
     "aws/aws-sdk-php": "^2.8.31",
-    "php": "~7.0.0",
+    "php": "^7.1",
     "lizards-and-pumpkins/catalog": "^3.0.0"
   },
   "require-dev": {
