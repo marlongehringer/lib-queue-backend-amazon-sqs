@@ -17,6 +17,7 @@ class SqsQueue implements Queue, Clearable
      * @var SqsClient
      */
     private $client;
+
     /**
      * @var string
      */
@@ -37,18 +38,12 @@ class SqsQueue implements Queue, Clearable
     {
         /** @var Model $queueAttributes */
         $queueAttributes = $this->client->getQueueAttributes([
-                'QueueUrl' => $this->queueUrl,
-                'AttributeNames' => ['ApproximateNumberOfMessages'],
-            ]
-        );
+            'QueueUrl' => $this->queueUrl,
+            'AttributeNames' => ['ApproximateNumberOfMessages'],
+        ]);
         return (int)$queueAttributes->get('Attributes')['ApproximateNumberOfMessages'];
     }
 
-    /**
-     * @param Message $message
-     *
-     * @return void
-     */
     public function add(Message $message): void
     {
         $this->client->sendMessage([

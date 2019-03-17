@@ -83,5 +83,4 @@ class SqsFactory implements MessageQueueFactory, Factory
         $configReader = $this->getMasterFactory()->createConfigReader();
         return $configReader->get('AWS_SECRET');
     }
-
 }
