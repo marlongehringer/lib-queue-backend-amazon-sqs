@@ -29,7 +29,7 @@
     }
   },
   "scripts": {
-    "test": "vendor/bin/phpunit -c tests/Unit/phpunit.xml.dist",
+    "test": "vendor/bin/phpunit -c tests/Unit && vendor/bin/phpunit -c tests/Integration",
     "sniff": "vendor/bin/phpcs --runtime-set ignore_warnings_on_exit true --runtime-set ignore_errors_on_exit true -p --colors --standard=vendor/lizards-and-pumpkins/coding-standards/src/LizardsAndPumpkins/ src/ tests/"
   },
   "minimum-stability": "dev",
