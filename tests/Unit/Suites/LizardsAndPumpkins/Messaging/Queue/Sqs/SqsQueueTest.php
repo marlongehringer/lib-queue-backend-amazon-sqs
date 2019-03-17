@@ -6,7 +6,9 @@ namespace LizardsAndPumpkins\Messaging\Queue\Sqs;
 use Aws\Sqs\SqsClient;
 use Guzzle\Service\Resource\Model;
 use LizardsAndPumpkins\Messaging\MessageReceiver;
+use LizardsAndPumpkins\Messaging\Queue;
 use LizardsAndPumpkins\Messaging\Queue\Message;
+use LizardsAndPumpkins\Util\Storage\Clearable;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -36,6 +38,16 @@ class SqsQueueTest extends TestCase
             ->disableOriginalConstructor()
             ->setMethods(['sendMessage', 'getQueueAttributes', 'PurgeQueue', 'receiveMessage'])->getMock();
         $this->queue = new SqsQueue($this->sqsClientMock, $this->queueName);
+    }
+
+    public function testImplementsQueue()
+    {
+        $this->assertInstanceOf(Queue::class, $this->queue);
+    }
+
+    public function testImplementsClearable()
+    {
+        $this->assertInstanceOf(Clearable::class, $this->queue);
     }
 
     public function testQueueIsEmptyOnStart(): void
