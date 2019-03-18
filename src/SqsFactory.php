@@ -35,6 +35,7 @@ class SqsFactory implements MessageQueueFactory, Factory
         /** @var ConfigReader $configReader */
         /** @noinspection PhpUndefinedMethodInspection */
         $configReader = $this->getMasterFactory()->createConfigReader();
+
         return $configReader->get('AWS_SQS_EVENT_QUEUE_URL');
     }
 
@@ -43,12 +44,13 @@ class SqsFactory implements MessageQueueFactory, Factory
         /** @var ConfigReader $configReader */
         /** @noinspection PhpUndefinedMethodInspection */
         $configReader = $this->getMasterFactory()->createConfigReader();
+
         return $configReader->get('AWS_SQS_COMMAND_QUEUE_URL');
     }
 
     private function getSqsClient(): SqsClient
     {
-        if (!$this->sqsClient) {
+        if (! $this->sqsClient) {
             $this->sqsClient = SqsClient::factory([
                 'credentials' => [
                     'key' => $this->getAwsKey(),
@@ -57,6 +59,7 @@ class SqsFactory implements MessageQueueFactory, Factory
                 'region' => $this->getAwsRegion(),
             ]);
         }
+
         return $this->sqsClient;
     }
 
@@ -65,6 +68,7 @@ class SqsFactory implements MessageQueueFactory, Factory
         /** @var ConfigReader $configReader */
         /** @noinspection PhpUndefinedMethodInspection */
         $configReader = $this->getMasterFactory()->createConfigReader();
+
         return $configReader->get('AWS_REGION');
     }
 
@@ -73,6 +77,7 @@ class SqsFactory implements MessageQueueFactory, Factory
         /** @var ConfigReader $configReader */
         /** @noinspection PhpUndefinedMethodInspection */
         $configReader = $this->getMasterFactory()->createConfigReader();
+
         return $configReader->get('AWS_KEY');
     }
 
@@ -81,6 +86,7 @@ class SqsFactory implements MessageQueueFactory, Factory
         /** @var ConfigReader $configReader */
         /** @noinspection PhpUndefinedMethodInspection */
         $configReader = $this->getMasterFactory()->createConfigReader();
+
         return $configReader->get('AWS_SECRET');
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace LizardsAndPumpkins\Messaging\Queue\Sqs;
@@ -26,7 +27,7 @@ class QueueAwsTest extends TestCase
      */
     private $queueUrl;
 
-    protected function setUp(): void
+    final protected function setUp(): void
     {
         $this->sqsClient = SqsClient::factory([
             'credentials' => [
@@ -35,17 +36,19 @@ class QueueAwsTest extends TestCase
             ],
             'region' => 'eu-central-1',
         ]);
+
         $queueName = str_replace('.', '-', uniqid('lap-sqs-test', true));
 
         /** @var Model $response */
         $response = $this->sqsClient->createQueue([
             'QueueName' => $queueName,
         ]);
+
         $this->queueUrl = $response->get('QueueUrl');
         $this->queue = new SqsQueue($this->sqsClient, $this->queueUrl);
     }
 
-    protected function tearDown(): void
+    final protected function tearDown(): void
     {
         $this->sqsClient->deleteQueue([
             'QueueUrl' => $this->queueUrl,
@@ -86,6 +89,7 @@ class QueueAwsTest extends TestCase
 
         /** @var Message $returnedMessage */
         $returnedMessage = $receiver->message;
+
         $this->assertSame($message->serialize(), $returnedMessage->serialize());
     }
 
@@ -101,9 +105,11 @@ class QueueAwsTest extends TestCase
     public function testClear(): void
     {
         $count = 4;
+
         for ($i = 0; $i < $count; $i++) {
             $this->queue->add(Message::withCurrentTime('name', [], []));
         }
+
         $this->assertSame($count, $this->queue->count());
         $this->queue->clear();
         $this->assertSame(0, $this->queue->count());
