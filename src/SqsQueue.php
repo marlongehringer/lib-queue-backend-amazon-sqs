@@ -42,7 +42,7 @@ class SqsQueue implements Queue, Clearable
             'AttributeNames' => ['ApproximateNumberOfMessages'],
         ]);
 
-        return (int) $queueAttributes->get('Attributes')['ApproximateNumberOfMessages'];
+        return (int)$queueAttributes->get('Attributes')['ApproximateNumberOfMessages'];
     }
 
     public function add(Message $message): void
@@ -62,14 +62,16 @@ class SqsQueue implements Queue, Clearable
 
     /**
      * @param int $numberOfMessagesToConsume
+     *
      * @return array[]
      */
     private function getMessages(int $numberOfMessagesToConsume): array
     {
-        return $this->client->receiveMessage([
+        $messages = $this->client->receiveMessage([
             'QueueUrl' => $this->queueUrl,
             'WaitTimeSeconds' => 20,
             'MaxNumberOfMessages' => $numberOfMessagesToConsume,
         ])->get('Messages');
+        return $messages ?? [];
     }
 }
