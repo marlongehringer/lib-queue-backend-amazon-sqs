@@ -96,7 +96,7 @@ class QueueAwsTest extends TestCase
     public function testCountMessages(): void
     {
         $count = 4;
-        for ($i = 0; $i < $count; $i ++) {
+        for ($i = 0; $i < $count; $i++) {
             $this->queue->add(Message::withCurrentTime('name', [], []));
         }
         $this->assertSame($count, $this->queue->count());
@@ -106,7 +106,7 @@ class QueueAwsTest extends TestCase
     {
         $count = 4;
 
-        for ($i = 0; $i < $count; $i ++) {
+        for ($i = 0; $i < $count; $i++) {
             $this->queue->add(Message::withCurrentTime('name', [], []));
         }
 
