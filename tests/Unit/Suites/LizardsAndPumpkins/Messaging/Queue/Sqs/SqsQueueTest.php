@@ -154,4 +154,17 @@ class SqsQueueTest extends TestCase
 
         $this->queue->consume($messageReceiver, $numberOfMessages);
     }
+
+    public function testConsumeOnGetMessagesReturnsNull(): void
+    {
+        /** @var MessageReceiver|MockObject $messageReceiver */
+        $messageReceiver = $this->createMock(MessageReceiver::class);
+
+        $messages = $this->createMock(Model::class);
+        $messages->method('get')->with('Messages')->willReturn(null);
+
+        $this->sqsClientMock->expects($this->once())->method('receiveMessage')->willReturn($messages);
+
+        $this->queue->consume($messageReceiver, 1);
+    }
 }
