@@ -27,7 +27,7 @@ class SqsFactoryTest extends TestCase
      */
     private $masterFactoryMock;
 
-    protected function setUp()
+    final protected function setUp(): void
     {
         $this->sqsFactory = new SqsFactory();
 

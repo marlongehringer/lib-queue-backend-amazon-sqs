@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace LizardsAndPumpkins\Messaging\Queue\Sqs;
@@ -32,7 +33,7 @@ class SqsQueueTest extends TestCase
      */
     private $queueName = 'testQueueName';
 
-    protected function setUp(): void
+    final protected function setUp(): void
     {
         $this->sqsClientMock = $this->getMockBuilder(SqsClient::class)
             ->disableOriginalConstructor()
@@ -40,12 +41,12 @@ class SqsQueueTest extends TestCase
         $this->queue = new SqsQueue($this->sqsClientMock, $this->queueName);
     }
 
-    public function testImplementsQueue()
+    public function testImplementsQueue(): void
     {
         $this->assertInstanceOf(Queue::class, $this->queue);
     }
 
-    public function testImplementsClearable()
+    public function testImplementsClearable(): void
     {
         $this->assertInstanceOf(Clearable::class, $this->queue);
     }
@@ -94,12 +95,10 @@ class SqsQueueTest extends TestCase
     {
         /** @var Message|MockObject $message */
         $message = $this->createMock(Message::class);
+
         return $message;
     }
 
-    /**
-     * @param int $count
-     */
     private function setCountResponse(int $count): void
     {
         $response = $this->createMock(Model::class);
@@ -128,8 +127,9 @@ class SqsQueueTest extends TestCase
 
     public function testConsume(): void
     {
-        $messageReciever = $this->createMock(MessageReceiver::class);
-        $messageReciever->expects($this->once())->method('receive')->with($this->isInstanceOf(Message::class));
+        /** @var MessageReceiver|MockObject $messageReceiver */
+        $messageReceiver = $this->createMock(MessageReceiver::class);
+        $messageReceiver->expects($this->once())->method('receive')->with($this->isInstanceOf(Message::class));
 
         $numberOfMessages = 1;
         $arguments = [
@@ -152,6 +152,6 @@ class SqsQueueTest extends TestCase
 
         $this->sqsClientMock->expects($this->once())->method('receiveMessage')->with($arguments)->willReturn($messages);
 
-        $this->queue->consume($messageReciever, $numberOfMessages);
+        $this->queue->consume($messageReceiver, $numberOfMessages);
     }
 }

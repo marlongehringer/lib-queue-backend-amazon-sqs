@@ -41,7 +41,8 @@ class SqsQueue implements Queue, Clearable
             'QueueUrl' => $this->queueUrl,
             'AttributeNames' => ['ApproximateNumberOfMessages'],
         ]);
-        return (int)$queueAttributes->get('Attributes')['ApproximateNumberOfMessages'];
+
+        return (int) $queueAttributes->get('Attributes')['ApproximateNumberOfMessages'];
     }
 
     public function add(Message $message): void
@@ -52,18 +53,23 @@ class SqsQueue implements Queue, Clearable
         ]);
     }
 
-    public function consume(MessageReceiver $messageReceiver, int $numberOfMessagesToConsume)
+    public function consume(MessageReceiver $messageReceiver, int $numberOfMessagesToConsume): void
     {
-        $messages = $this->client->receiveMessage([
+        every($this->getMessages($numberOfMessagesToConsume), function (array $message) use ($messageReceiver) {
+            $messageReceiver->receive(Message::rehydrate($message['Body']));
+        });
+    }
+
+    /**
+     * @param int $numberOfMessagesToConsume
+     * @return array[]
+     */
+    private function getMessages(int $numberOfMessagesToConsume): array
+    {
+        return $this->client->receiveMessage([
             'QueueUrl' => $this->queueUrl,
             'WaitTimeSeconds' => 20,
             'MaxNumberOfMessages' => $numberOfMessagesToConsume,
         ])->get('Messages');
-
-        foreach ($messages as $message) {
-            $message = Message::rehydrate($message['Body']);
-            $messageReceiver->receive($message);
-            $numberOfMessagesToConsume--;
-        }
     }
 }
