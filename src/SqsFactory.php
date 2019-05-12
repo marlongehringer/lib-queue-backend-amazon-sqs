@@ -36,7 +36,11 @@ class SqsFactory implements MessageQueueFactory, Factory
         /** @noinspection PhpUndefinedMethodInspection */
         $configReader = $this->getMasterFactory()->createConfigReader();
 
-        return $configReader->get('AWS_SQS_EVENT_QUEUE_URL');
+        try {
+            return $configReader->get('AWS_SQS_EVENT_QUEUE_URL');
+        } catch (\TypeError $e) {
+            throw new \RuntimeException('Please pass AWS_SQS_EVENT_QUEUE_URL as env variable.');
+        }
     }
 
     private function getCommandQueueUrl(): string
@@ -45,7 +49,11 @@ class SqsFactory implements MessageQueueFactory, Factory
         /** @noinspection PhpUndefinedMethodInspection */
         $configReader = $this->getMasterFactory()->createConfigReader();
 
-        return $configReader->get('AWS_SQS_COMMAND_QUEUE_URL');
+        try {
+            return $configReader->get('AWS_SQS_COMMAND_QUEUE_URL');
+        } catch (\TypeError $e) {
+            throw new \RuntimeException('Please pass AWS_SQS_COMMAND_QUEUE_URL as env variable.');
+        }
     }
 
     private function getSqsClient(): SqsClient

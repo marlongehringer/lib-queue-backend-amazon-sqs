@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LizardsAndPumpkins\Messaging\Queue\Sqs;
 
+use Aws\Common\Exception\InvalidArgumentException;
 use LizardsAndPumpkins\Messaging\MessageQueueFactory;
 use LizardsAndPumpkins\Messaging\Queue;
 use LizardsAndPumpkins\Util\Config\ConfigReader;
@@ -56,6 +57,54 @@ class SqsFactoryTest extends TestCase
     public function testCreateCommandMessageQueue(): void
     {
         $this->prepareConfigReader();
+        $this->assertInstanceOf(Queue::class, $this->sqsFactory->createCommandMessageQueue());
+    }
+
+    public function testThrowsExceptionIfNoAwsArea()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('A region is required when using Amazon Simple Queue Service');
+
+        $configReader = $this->createMock(ConfigReader::class);
+        $this->masterFactoryMock->method('createConfigReader')->willReturn($configReader);
+
+        $this->assertInstanceOf(Queue::class, $this->sqsFactory->createCommandMessageQueue());
+    }
+
+    public function testThrowsExceptionIfNoEventQueueUrl()
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Please pass AWS_SQS_EVENT_QUEUE_URL as env variable.');
+
+        $configReader = $this->createMock(ConfigReader::class);
+        $configReader->method('get')->willReturnMap([
+            ['AWS_REGION', 'eu-central-1'],
+            ['AWS_KEY', 'MY_AWS_KEY'],
+            ['AWS_SECRET', 'MY_AWS_SECRET'],
+        ]);
+        $this->masterFactoryMock->method('createConfigReader')->willReturn($configReader);
+
+        $this->assertInstanceOf(Queue::class, $this->sqsFactory->createEventMessageQueue());
+    }
+
+    public function testThrowsExceptionIfNoCredentials()
+    {
+
+    }
+
+    public function testThrowsExceptionIfNoCommandQueueUrl()
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Please pass AWS_SQS_COMMAND_QUEUE_URL as env variable.');
+
+        $configReader = $this->createMock(ConfigReader::class);
+        $configReader->method('get')->willReturnMap([
+            ['AWS_REGION', 'eu-central-1'],
+            ['AWS_KEY', 'MY_AWS_KEY'],
+            ['AWS_SECRET', 'MY_AWS_SECRET'],
+        ]);
+        $this->masterFactoryMock->method('createConfigReader')->willReturn($configReader);
+
         $this->assertInstanceOf(Queue::class, $this->sqsFactory->createCommandMessageQueue());
     }
 
