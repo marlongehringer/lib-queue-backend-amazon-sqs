@@ -93,6 +93,35 @@ class QueueAwsTest extends TestCase
         $this->assertSame($message->serialize(), $returnedMessage->serialize());
     }
 
+    public function testMoreThan20MessagesComeBack()
+    {
+        for ($i = 0; $i < 15; $i++) {
+            $message = Message::withCurrentTime(
+                uniqid('lap', true), ['with complex payload'], ['and' => 'some metadata']
+            );
+            $this->queue->add($message);
+        }
+
+        $this->assertSame(15, $this->queue->count());
+
+        $receiver = new class implements MessageReceiver
+        {
+            /**
+             * @var Message
+             */
+            public $messages;
+
+            public function receive(Message $message): void
+            {
+                $this->messages[] = $message;
+            }
+        };
+
+        $consumeMoreThanPossible = 11;
+        $this->queue->consume($receiver, $consumeMoreThanPossible);
+        $this->assertLessThanOrEqual(10, count($receiver->messages));
+    }
+
     public function testCountMessages(): void
     {
         $count = 4;

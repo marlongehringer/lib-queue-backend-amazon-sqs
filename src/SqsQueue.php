@@ -13,6 +13,7 @@ use LizardsAndPumpkins\Util\Storage\Clearable;
 
 class SqsQueue implements Queue, Clearable
 {
+    const MAX_AWS_SQS_CONSUMEABLE = 10;
     /**
      * @var SqsClient
      */
@@ -66,10 +67,14 @@ class SqsQueue implements Queue, Clearable
      */
     private function getMessages(int $numberOfMessagesToConsume): array
     {
+        if ($numberOfMessagesToConsume < 1) {
+            throw new \InvalidArgumentException('You need to consume at least one message.');
+        }
+
         $messages = $this->client->receiveMessage([
             'QueueUrl' => $this->queueUrl,
             'WaitTimeSeconds' => 20,
-            'MaxNumberOfMessages' => $numberOfMessagesToConsume,
+            'MaxNumberOfMessages' => min($numberOfMessagesToConsume, self::MAX_AWS_SQS_CONSUMEABLE),
         ])->get('Messages');
 
         return $messages ?? [];
