@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace LizardsAndPumpkins\Messaging\Queue\Sqs;
 
-use Aws\Common\Exception\InvalidArgumentException;
 use LizardsAndPumpkins\Messaging\MessageQueueFactory;
 use LizardsAndPumpkins\Messaging\Queue;
+use LizardsAndPumpkins\Messaging\Queue\Sqs\Exception\MissingConfigurationException;
 use LizardsAndPumpkins\Util\Config\ConfigReader;
 use LizardsAndPumpkins\Util\Factory\Factory;
 use LizardsAndPumpkins\Util\Factory\MasterFactory;
@@ -62,10 +62,14 @@ class SqsFactoryTest extends TestCase
 
     public function testThrowsExceptionIfNoAwsArea()
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('A region is required when using Amazon Simple Queue Service');
+        $this->expectException(MissingConfigurationException::class);
+        $this->expectExceptionMessage('Please pass AWS_REGION as env variable.');
 
         $configReader = $this->createMock(ConfigReader::class);
+        $configReader->method('get')->willReturnMap([
+            ['AWS_KEY', 'MY_AWS_KEY'],
+            ['AWS_SECRET', 'MY_AWS_SECRET'],
+        ]);
         $this->masterFactoryMock->method('createConfigReader')->willReturn($configReader);
 
         $this->assertInstanceOf(Queue::class, $this->sqsFactory->createCommandMessageQueue());
@@ -89,7 +93,13 @@ class SqsFactoryTest extends TestCase
 
     public function testThrowsExceptionIfNoCredentials()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Please pass credentials as env variable - check documentation how.');
 
+        $configReader = $this->createMock(ConfigReader::class);
+        $this->masterFactoryMock->method('createConfigReader')->willReturn($configReader);
+
+        $this->assertInstanceOf(Queue::class, $this->sqsFactory->createCommandMessageQueue());
     }
 
     public function testThrowsExceptionIfNoCommandQueueUrl()
