@@ -50,15 +50,16 @@ class SqsFactory implements MessageQueueFactory, Factory
 
     private function getSqsClient(): SqsClient
     {
-        if (! $this->sqsClient) {
-            $this->sqsClient = SqsClient::factory([
-                'credentials' => [
-                    'key' => $this->getAwsKey(),
-                    'secret' => $this->getAwsSecret(),
-                ],
-                'region' => $this->getAwsRegion(),
-            ]);
+        if ($this->sqsClient) {
+            return $this->sqsClient;
         }
+        $this->sqsClient = SqsClient::factory([
+            'credentials' => [
+                'key' => $this->getAwsKey(),
+                'secret' => $this->getAwsSecret(),
+            ],
+            'region' => $this->getAwsRegion(),
+        ]);
 
         return $this->sqsClient;
     }
