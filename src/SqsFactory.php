@@ -63,18 +63,17 @@ class SqsFactory implements MessageQueueFactory, Factory
         if ($this->sqsClient) {
             return $this->sqsClient;
         }
-
+        $credentials = [];
         try {
             $credentials = [
                 'key' => $this->getAwsKey(),
                 'secret' => $this->getAwsSecret(),
             ];
         } catch (EnvironmentConfigKeyIsNotSetException $e) {
-            throw new MissingConfigurationException('Please pass credentials as env variable - check documentation how.');
-        }
-
-        if (! $this->getAwsKey() || ! $this->getAwsSecret()) {
-            throw new MissingConfigurationException('Please pass credentials as env variable - check documentation how.');
+            // Intended, credentials can be provided via default credential provider chain
+            //see https://github.com/lizards-and-pumpkins/lib-queue-backend-amazon-sqs/issues/8
+        } catch (\TypeError $e) {
+            // only happens on unit test
         }
 
         $this->sqsClient = SqsClient::factory([

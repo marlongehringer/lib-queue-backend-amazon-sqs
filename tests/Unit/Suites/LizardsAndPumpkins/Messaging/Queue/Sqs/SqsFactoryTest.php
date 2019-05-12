@@ -91,12 +91,14 @@ class SqsFactoryTest extends TestCase
         $this->assertInstanceOf(Queue::class, $this->sqsFactory->createEventMessageQueue());
     }
 
-    public function testThrowsExceptionIfNoCredentials()
+    public function testThrowsNoExceptionIfNoCredentials()
     {
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Please pass credentials as env variable - check documentation how.');
-
         $configReader = $this->createMock(ConfigReader::class);
+        $configReader->method('get')->willReturnMap([
+            ['AWS_SQS_COMMAND_QUEUE_URL', 'arn:aws:sqs:eu-central-1:311520829372:lap-sqs-test-command'],
+            ['AWS_SQS_EVENT_QUEUE_URL', 'arn:aws:sqs:eu-central-1:311520829372:lap-sqs-test-event'],
+            ['AWS_REGION', 'eu-central-1'],
+        ]);
         $this->masterFactoryMock->method('createConfigReader')->willReturn($configReader);
 
         $this->assertInstanceOf(Queue::class, $this->sqsFactory->createCommandMessageQueue());
