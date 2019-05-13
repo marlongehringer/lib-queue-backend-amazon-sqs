@@ -90,6 +90,7 @@ class SqsFactoryTest extends TestCase
             ['AWS_KEY', 'MY_AWS_KEY'],
             ['AWS_SECRET', 'MY_AWS_SECRET'],
         ]);
+        $configReader->method('has')->willReturn(true);
         $this->masterFactoryMock->method('createConfigReader')->willReturn($configReader);
     }
 }
