@@ -51,10 +51,8 @@ class SqsFactory implements MessageQueueFactory, Factory
     private function getSqsClient(): SqsClient
     {
         if (! $this->sqsClient) {
-            $credentials = $this->getAwsCredentials();
-
             $this->sqsClient = SqsClient::factory([
-                'credentials' => $credentials,
+                'credentials' => $this->getAwsCredentials(),
                 'region' => $this->getAwsRegion(),
             ]);
         }
@@ -71,6 +69,9 @@ class SqsFactory implements MessageQueueFactory, Factory
         return $configReader->get('AWS_REGION');
     }
 
+    /**
+     * @return string[]
+     */
     private function getAwsCredentials(): array
     {
         /** @var ConfigReader $configReader */
