@@ -7,9 +7,7 @@ namespace LizardsAndPumpkins\Messaging\Queue\Sqs;
 use Aws\Sqs\SqsClient;
 use LizardsAndPumpkins\Messaging\MessageQueueFactory;
 use LizardsAndPumpkins\Messaging\Queue;
-use LizardsAndPumpkins\Messaging\Queue\Sqs\Exception\MissingConfigurationException;
 use LizardsAndPumpkins\Util\Config\ConfigReader;
-use LizardsAndPumpkins\Util\Config\Exception\EnvironmentConfigKeyIsNotSetException;
 use LizardsAndPumpkins\Util\Factory\Factory;
 use LizardsAndPumpkins\Util\Factory\FactoryTrait;
 
@@ -38,11 +36,7 @@ class SqsFactory implements MessageQueueFactory, Factory
         /** @noinspection PhpUndefinedMethodInspection */
         $configReader = $this->getMasterFactory()->createConfigReader();
 
-        try {
-            return $configReader->get('AWS_SQS_EVENT_QUEUE_URL');
-        } catch (\TypeError $e) {
-            throw new MissingConfigurationException('Please pass AWS_SQS_EVENT_QUEUE_URL as env variable.');
-        }
+        return $configReader->get('AWS_SQS_EVENT_QUEUE_URL');
     }
 
     private function getCommandQueueUrl(): string
@@ -51,11 +45,7 @@ class SqsFactory implements MessageQueueFactory, Factory
         /** @noinspection PhpUndefinedMethodInspection */
         $configReader = $this->getMasterFactory()->createConfigReader();
 
-        try {
-            return $configReader->get('AWS_SQS_COMMAND_QUEUE_URL');
-        } catch (\TypeError $e) {
-            throw new MissingConfigurationException('Please pass AWS_SQS_COMMAND_QUEUE_URL as env variable.');
-        }
+        return $configReader->get('AWS_SQS_COMMAND_QUEUE_URL');
     }
 
     private function getSqsClient(): SqsClient
@@ -63,18 +53,7 @@ class SqsFactory implements MessageQueueFactory, Factory
         if ($this->sqsClient) {
             return $this->sqsClient;
         }
-        $credentials = [];
-        try {
-            $credentials = [
-                'key' => $this->getAwsKey(),
-                'secret' => $this->getAwsSecret(),
-            ];
-        } catch (EnvironmentConfigKeyIsNotSetException $e) {
-            // Intended, credentials can be provided via default credential provider chain
-            //see https://github.com/lizards-and-pumpkins/lib-queue-backend-amazon-sqs/issues/8
-        } catch (\TypeError $e) {
-            // only happens on unit test
-        }
+        $credentials = $this->getAwsCredentials();
 
         $this->sqsClient = SqsClient::factory([
             'credentials' => $credentials,
@@ -89,28 +68,23 @@ class SqsFactory implements MessageQueueFactory, Factory
         /** @var ConfigReader $configReader */
         /** @noinspection PhpUndefinedMethodInspection */
         $configReader = $this->getMasterFactory()->createConfigReader();
-        try {
-            return $configReader->get('AWS_REGION');
-        } catch (\TypeError $e) {
-            throw new MissingConfigurationException('Please pass AWS_REGION as env variable.');
+
+        return $configReader->get('AWS_REGION');
+    }
+
+    private function getAwsCredentials(): array
+    {
+        /** @var ConfigReader $configReader */
+        /** @noinspection PhpUndefinedMethodInspection */
+        $configReader = $this->getMasterFactory()->createConfigReader();
+
+        if ($configReader->has('AWS_KEY') && $configReader->has('AWS_SECRET')) {
+            return [
+                'key' => $configReader->get('AWS_KEY'),
+                'secret' => $configReader->get('AWS_SECRET'),
+            ];
         }
-    }
 
-    private function getAwsKey(): string
-    {
-        /** @var ConfigReader $configReader */
-        /** @noinspection PhpUndefinedMethodInspection */
-        $configReader = $this->getMasterFactory()->createConfigReader();
-
-        return $configReader->get('AWS_KEY');
-    }
-
-    private function getAwsSecret(): string
-    {
-        /** @var ConfigReader $configReader */
-        /** @noinspection PhpUndefinedMethodInspection */
-        $configReader = $this->getMasterFactory()->createConfigReader();
-
-        return $configReader->get('AWS_SECRET');
+        return [];
     }
 }

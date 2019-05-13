@@ -6,7 +6,6 @@ namespace LizardsAndPumpkins\Messaging\Queue\Sqs;
 
 use LizardsAndPumpkins\Messaging\MessageQueueFactory;
 use LizardsAndPumpkins\Messaging\Queue;
-use LizardsAndPumpkins\Messaging\Queue\Sqs\Exception\MissingConfigurationException;
 use LizardsAndPumpkins\Util\Config\ConfigReader;
 use LizardsAndPumpkins\Util\Factory\Factory;
 use LizardsAndPumpkins\Util\Factory\MasterFactory;
@@ -60,37 +59,6 @@ class SqsFactoryTest extends TestCase
         $this->assertInstanceOf(Queue::class, $this->sqsFactory->createCommandMessageQueue());
     }
 
-    public function testThrowsExceptionIfNoAwsArea()
-    {
-        $this->expectException(MissingConfigurationException::class);
-        $this->expectExceptionMessage('Please pass AWS_REGION as env variable.');
-
-        $configReader = $this->createMock(ConfigReader::class);
-        $configReader->method('get')->willReturnMap([
-            ['AWS_KEY', 'MY_AWS_KEY'],
-            ['AWS_SECRET', 'MY_AWS_SECRET'],
-        ]);
-        $this->masterFactoryMock->method('createConfigReader')->willReturn($configReader);
-
-        $this->assertInstanceOf(Queue::class, $this->sqsFactory->createCommandMessageQueue());
-    }
-
-    public function testThrowsExceptionIfNoEventQueueUrl()
-    {
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Please pass AWS_SQS_EVENT_QUEUE_URL as env variable.');
-
-        $configReader = $this->createMock(ConfigReader::class);
-        $configReader->method('get')->willReturnMap([
-            ['AWS_REGION', 'eu-central-1'],
-            ['AWS_KEY', 'MY_AWS_KEY'],
-            ['AWS_SECRET', 'MY_AWS_SECRET'],
-        ]);
-        $this->masterFactoryMock->method('createConfigReader')->willReturn($configReader);
-
-        $this->assertInstanceOf(Queue::class, $this->sqsFactory->createEventMessageQueue());
-    }
-
     public function testThrowsNoExceptionIfNoCredentials()
     {
         $configReader = $this->createMock(ConfigReader::class);
@@ -99,22 +67,14 @@ class SqsFactoryTest extends TestCase
             ['AWS_SQS_EVENT_QUEUE_URL', 'arn:aws:sqs:eu-central-1:311520829372:lap-sqs-test-event'],
             ['AWS_REGION', 'eu-central-1'],
         ]);
-        $this->masterFactoryMock->method('createConfigReader')->willReturn($configReader);
-
-        $this->assertInstanceOf(Queue::class, $this->sqsFactory->createCommandMessageQueue());
-    }
-
-    public function testThrowsExceptionIfNoCommandQueueUrl()
-    {
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Please pass AWS_SQS_COMMAND_QUEUE_URL as env variable.');
-
-        $configReader = $this->createMock(ConfigReader::class);
-        $configReader->method('get')->willReturnMap([
-            ['AWS_REGION', 'eu-central-1'],
-            ['AWS_KEY', 'MY_AWS_KEY'],
-            ['AWS_SECRET', 'MY_AWS_SECRET'],
+        $configReader->method('has')->willReturnMap([
+            ['AWS_SQS_COMMAND_QUEUE_URL', true],
+            ['AWS_SQS_EVENT_QUEUE_URL', true],
+            ['AWS_REGION', true],
+            ['AWS_KEY', false],
+            ['AWS_SECRET', false],
         ]);
+
         $this->masterFactoryMock->method('createConfigReader')->willReturn($configReader);
 
         $this->assertInstanceOf(Queue::class, $this->sqsFactory->createCommandMessageQueue());
