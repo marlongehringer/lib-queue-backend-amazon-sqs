@@ -34,16 +34,6 @@ class SqsFactoryTest extends TestCase
         $this->masterFactoryMock = $this->getMockBuilder(MasterFactory::class)
             ->setMethods(['createConfigReader'])->getMockForAbstractClass();
 
-        $configReader = $this->createMock(ConfigReader::class);
-        $configReader->method('get')->willReturnMap([
-            ['AWS_SQS_COMMAND_QUEUE_URL', 'arn:aws:sqs:eu-central-1:311520829372:lap-sqs-test-command'],
-            ['AWS_SQS_EVENT_QUEUE_URL', 'arn:aws:sqs:eu-central-1:311520829372:lap-sqs-test-event'],
-            ['AWS_REGION', 'eu-central-1'],
-            ['AWS_KEY', 'MY_AWS_KEY'],
-            ['AWS_SECRET', 'MY_AWS_SECRET'],
-        ]);
-        $this->masterFactoryMock->method('createConfigReader')->willReturn($configReader);
-
         $this->sqsFactory->setMasterFactory($this->masterFactoryMock);
     }
 
@@ -59,11 +49,48 @@ class SqsFactoryTest extends TestCase
 
     public function testCreateEventMessageQueue(): void
     {
+        $this->prepareConfigReader();
         $this->assertInstanceOf(Queue::class, $this->sqsFactory->createEventMessageQueue());
     }
 
     public function testCreateCommandMessageQueue(): void
     {
+        $this->prepareConfigReader();
         $this->assertInstanceOf(Queue::class, $this->sqsFactory->createCommandMessageQueue());
+    }
+
+    public function testThrowsNoExceptionIfNoCredentials()
+    {
+        $configReader = $this->createMock(ConfigReader::class);
+        $configReader->method('get')->willReturnMap([
+            ['AWS_SQS_COMMAND_QUEUE_URL', 'arn:aws:sqs:eu-central-1:311520829372:lap-sqs-test-command'],
+            ['AWS_SQS_EVENT_QUEUE_URL', 'arn:aws:sqs:eu-central-1:311520829372:lap-sqs-test-event'],
+            ['AWS_REGION', 'eu-central-1'],
+        ]);
+        $configReader->method('has')->willReturnMap([
+            ['AWS_SQS_COMMAND_QUEUE_URL', true],
+            ['AWS_SQS_EVENT_QUEUE_URL', true],
+            ['AWS_REGION', true],
+            ['AWS_KEY', false],
+            ['AWS_SECRET', false],
+        ]);
+
+        $this->masterFactoryMock->method('createConfigReader')->willReturn($configReader);
+
+        $this->assertInstanceOf(Queue::class, $this->sqsFactory->createCommandMessageQueue());
+    }
+
+    private function prepareConfigReader(): void
+    {
+        $configReader = $this->createMock(ConfigReader::class);
+        $configReader->method('get')->willReturnMap([
+            ['AWS_SQS_COMMAND_QUEUE_URL', 'arn:aws:sqs:eu-central-1:311520829372:lap-sqs-test-command'],
+            ['AWS_SQS_EVENT_QUEUE_URL', 'arn:aws:sqs:eu-central-1:311520829372:lap-sqs-test-event'],
+            ['AWS_REGION', 'eu-central-1'],
+            ['AWS_KEY', 'MY_AWS_KEY'],
+            ['AWS_SECRET', 'MY_AWS_SECRET'],
+        ]);
+        $configReader->method('has')->willReturn(true);
+        $this->masterFactoryMock->method('createConfigReader')->willReturn($configReader);
     }
 }

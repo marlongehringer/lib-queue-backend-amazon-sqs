@@ -52,10 +52,7 @@ class SqsFactory implements MessageQueueFactory, Factory
     {
         if (! $this->sqsClient) {
             $this->sqsClient = SqsClient::factory([
-                'credentials' => [
-                    'key' => $this->getAwsKey(),
-                    'secret' => $this->getAwsSecret(),
-                ],
+                'credentials' => $this->getAwsCredentials(),
                 'region' => $this->getAwsRegion(),
             ]);
         }
@@ -72,21 +69,22 @@ class SqsFactory implements MessageQueueFactory, Factory
         return $configReader->get('AWS_REGION');
     }
 
-    private function getAwsKey(): string
+    /**
+     * @return string[]
+     */
+    private function getAwsCredentials(): array
     {
         /** @var ConfigReader $configReader */
         /** @noinspection PhpUndefinedMethodInspection */
         $configReader = $this->getMasterFactory()->createConfigReader();
 
-        return $configReader->get('AWS_KEY');
-    }
+        if ($configReader->has('AWS_KEY') && $configReader->has('AWS_SECRET')) {
+            return [
+                'key' => $configReader->get('AWS_KEY'),
+                'secret' => $configReader->get('AWS_SECRET'),
+            ];
+        }
 
-    private function getAwsSecret(): string
-    {
-        /** @var ConfigReader $configReader */
-        /** @noinspection PhpUndefinedMethodInspection */
-        $configReader = $this->getMasterFactory()->createConfigReader();
-
-        return $configReader->get('AWS_SECRET');
+        return [];
     }
 }
