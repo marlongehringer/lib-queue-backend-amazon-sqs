@@ -155,6 +155,49 @@ class SqsQueueTest extends TestCase
         $this->queue->consume($messageReceiver, $numberOfMessages);
     }
 
+    public function testConsumeMaxTenMessages(): void
+    {
+        /** @var MessageReceiver|MockObject $messageReceiver */
+        $messageReceiver = $this->createMock(MessageReceiver::class);
+        $messageReceiver->expects($this->once())->method('receive')->with($this->isInstanceOf(Message::class));
+
+        $numberOfMessages = 10;
+        $moreThanTenMessages = 15;
+        $arguments = [
+            'QueueUrl' => $this->queueName,
+            'WaitTimeSeconds' => 20,
+            'MaxNumberOfMessages' => $numberOfMessages,
+        ];
+
+        $messageBody = Message::withCurrentTime('messageName', ['thisIsThePayload'], ['metadata' => 'is possible!'])
+            ->serialize();
+
+        $messages = $this->createMock(Model::class);
+        $messages->method('get')->with('Messages')->willReturn(
+            $allMessages = [
+                $singleMessage = [
+                    'Body' => $messageBody,
+                ],
+            ]
+        );
+
+        $this->sqsClientMock->expects($this->once())->method('receiveMessage')->with($arguments)->willReturn($messages);
+
+        $this->queue->consume($messageReceiver, $moreThanTenMessages);
+    }
+
+    public function testThrowsExceptionIfConsumeLessThanOneMessage()
+    {
+        $this->expectExceptionMessage('You need to consume at least one message.');
+        $this->expectException(\InvalidArgumentException::class);
+
+        $lessThanOne = 0;
+
+        /** @var MessageReceiver|MockObject $messageReceiver */
+        $messageReceiver = $this->createMock(MessageReceiver::class);
+        $this->queue->consume($messageReceiver, $lessThanOne);
+    }
+
     public function testConsumeOnGetMessagesReturnsNull(): void
     {
         /** @var MessageReceiver|MockObject $messageReceiver */
