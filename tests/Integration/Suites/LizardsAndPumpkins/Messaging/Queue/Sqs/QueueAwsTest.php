@@ -93,7 +93,7 @@ class QueueAwsTest extends TestCase
         $this->assertSame($message->serialize(), $returnedMessage->serialize());
     }
 
-    public function testMoreThan20MessagesComeBack()
+    public function testMoreThan10MessagesComeBack()
     {
         for ($i = 0; $i < 15; $i++) {
             $message = Message::withCurrentTime(

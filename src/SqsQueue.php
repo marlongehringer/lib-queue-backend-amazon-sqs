@@ -14,6 +14,7 @@ use LizardsAndPumpkins\Util\Storage\Clearable;
 class SqsQueue implements Queue, Clearable
 {
     const MAX_AWS_SQS_CONSUMEABLE = 10;
+
     /**
      * @var SqsClient
      */
