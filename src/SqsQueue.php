@@ -59,6 +59,11 @@ class SqsQueue implements Queue, Clearable
     {
         every($this->getMessages($numberOfMessagesToConsume), function (array $message) use ($messageReceiver) {
             $messageReceiver->receive(Message::rehydrate($message['Body']));
+
+            $this->client->deleteMessage([
+                'QueueUrl' => $this->queueUrl,
+                'ReceiptHandle' => $message['ReceiptHandle']
+            ]);
         });
     }
 
